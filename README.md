@@ -43,14 +43,14 @@ graph TD
       E[Template HTML] --> |"Return a view based on data"| F
     end
 ```
-Explanation:
-a. **Client**: The client sends an HTTP request to the Django server.
-b. **urls.py**: Django uses urls.py to match the requested URL 3.with the corresponding view function in views.py.
-c. **views.py**: The view function in views.py handles the request. It may need to fetch data from the database using models.py (optional).
-d. **models.py**: If the view requires interaction with the database, it retrieves or updates data through models.py.
-e. **Template HTML**: Once the data is processed, the view sends it to a template (HTML) for rendering.
-f. **Response HTML**: The template generates an HTML response based on the data provided.
-g. **Client**: The rendered HTML is sent back to the client, where it's displayed as a web page.
+- Explanation:
+    1. **Client**: The client sends an HTTP request to the Django server.
+    2. **urls.py**: Django uses urls.py to match the requested URL 3.with the corresponding view function in views.py.
+    3. **views.py**: The view function in views.py handles the request. It may need to fetch data from the database using models.py (optional).
+    4. **models.py**: If the view requires interaction with the database, it retrieves or updates data through models.py.
+    5. **Template HTML**: Once the data is processed, the view sends it to a template (HTML) for rendering.
+    6. **Response HTML**: The template generates an HTML response based on the data provided.
+    7. **Client**: The rendered HTML is sent back to the client, where it's displayed as a web page.
 
 - Role of `git` in software development
     - **Version control**: Git keeps a detailed history of all changes made to the code, helping developers track progress.
@@ -71,4 +71,4 @@ g. **Client**: The rendered HTML is sent back to the client, where it's displaye
     - **Versatile**: Django’s flexibility allows it to be used for various web applications, from CMS to e-commerce platforms.
 
 - Django ORM
-    Django's model is called an **Object-Relational Mapping (ORM)** because it allows developers to interact with the database using Python objects instead of SQL. The ORM maps Python classes (representing database tables) and their attributes (columns) to database records. This abstraction simplifies database operations like querying and updating data, making it more intuitive and efficient for developers to work with relational databases.
+    - Django's model is called an **Object-Relational Mapping (ORM)** because it allows developers to interact with the database using Python objects instead of SQL. The ORM maps Python classes (representing database tables) and their attributes (columns) to database records. This abstraction simplifies database operations like querying and updating data, making it more intuitive and efficient for developers to work with relational databases.
