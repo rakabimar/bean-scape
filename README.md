@@ -2,7 +2,7 @@
 Platform Based Programming (PBP) Course --- Tugas Individu 
 
 # Tugas Individu 2
-[beanScape's url](rakabima-ghaniendra-beanscape.pbp.cs.ui.ac.id)
+[beanScape's url](http://rakabima-ghaniendra-beanscape.pbp.cs.ui.ac.id)
 - Implementing Checklists
     1. Initialize repository
         * Create a new repository with the project's name `bean-scape`
