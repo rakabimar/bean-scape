@@ -232,3 +232,13 @@ graph TD
         path('json/<str:id>/', show_json_by_id, name='show_json_by_id')
     ]
     ```
+
+- Access URLs with Postman
+    1. XML
+    ![show_xml](images/xml.png)
+    2. XML by ID
+    ![show_xml_by_id](images/xmlById.png)
+    3. JSON
+    ![show_json](images/json.png)
+    4. JSON by ID
+    ![show_json_by_id](images/jsonById.png)
