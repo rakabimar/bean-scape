@@ -4,6 +4,7 @@ Platform Based Programming (PBP) Course --- Tugas Individu
 ## Bookmarks
 - [Tugas 2](#tugas-2)
 - [Tugas 3](#tugas-3)
+- [Tugas 4](#tugas-4)
 
 ## Tugas 2 <a id="tugas-2"></a>
 [beanScape's url](http://rakabima-ghaniendra-beanscape.pbp.cs.ui.ac.id)
@@ -242,3 +243,252 @@ graph TD
     ![show_json](images/json.png)
     4. JSON by ID
     ![show_json_by_id](images/jsonById.png)
+
+## Tugas 4 <a id="tugas-4"></a>
+
+- `HttpResponseRedirect():` VS `redirect():`
+    1. `HttpResponseRedirect():`
+        - **Direct Class for Redirection**: This is a class in Django that explicitly creates an HTTP response with status code 302 to indicate a redirection.
+        - **Requires Full URL**: You must provide a complete URL path as the argument, which can be static or dynamically generated based on user input or logic.
+        - **Control Over URL**: This is useful when you need direct control over the URL or if you're working with external URLs or generating URLs dynamically.
+        - **Example**:
+        ```
+        from django.http import HttpResponseRedirect
+        return HttpResponseRedirect('/new-path/')
+        ```
+
+    2. `redirect():`
+        - **Shortcut Function**: Django provides this helper function that simplifies the redirection process by allowing you to pass a variety of inputs.
+        - **Flexible Inputs**: Unlike HttpResponseRedirect(), this function can accept a full URL, a view name (which Django will resolve to a URL), or even a model instance, which Django can use to create the appropriate redirect URL. This flexibility makes it easier to use in most cases.
+        - **Simpler and Concise**: This function is especially useful when working with named views or model instances because it reduces boilerplate code.
+        - **Example**:
+        ```
+        from django.shortcuts import redirect
+        return redirect('home')  # Redirect to the view named 'home'
+        ```
+    2. Summary:
+        - `HttpResponseRedirect()` gives explicit control and is useful for simple, direct URL handling.
+        - `redirect()` is a more convenient and flexible choice because it can handle different types of inputs (URLs, view names, or models) and automatically generates the appropriate redirect URL. It’s widely used in Django projects for its simplicity.
+- Steps to connect models (`Product` with `User`)
+    1. Importing the `User` Model
+        `from django.contrib.auth.models import User`
+        This import makes the User model available for use in other models or views, allowing products to be associated with specific users.
+    2. Adding a ForeignKey Field in the Product Model
+        In the Product model, a ForeignKey field can be added to establish a many-to-one relationship with the User model:
+        ```
+        # models.py
+        class Product(models.Model):
+            ...
+            user = models.ForeignKey(User, on_delete=models.CASCADE)
+            ...
+        ```
+        Explanation:
+        - ForeignKey: Defines a many-to-one relationship where each product is linked to a single user, but a user can have many products.
+        - on_delete=models.CASCADE: Ensures that if the related user is deleted, all products associated with that user will also be removed. This behavior helps maintain referential integrity in the database.
+    3. Migration Steps
+        After adding a new field to the model, the changes must be reflected in the database by creating and applying migrations with:
+        `python manage.py ma4kemigrations` then `python manage.py migrate`
+    4. Usage in app
+        By connecting the `Product` model with the `User` model, the main app can filter products based on the current user, ensuring that only products belonging to that user are displayed.
+        ```
+        # views.py
+        @login_required(login_url='/login')
+        def show_main(request):
+            product_requests = Product.objects.filter(user=request.user)
+        ```
+- _Authentication_ VS _Authorization_
+    1. **Authentication** is the process of verifying a user's identity, typically through credentials like a username and password.
+    2. **Authorization** refers to determining what an authenticated user is allowed to do, such as accessing specific resources or performing certain actions.
+    3. When a user logs in, authentication is performed by verifying the user's credentials. If valid, Django creates a session for the user and marks them as authenticated.
+    4. Django Implementation:
+        - Authentication in Django is handled through the built-in authentication system (`django.contrib.auth`). It verifies user credentials using methods like `authenticate()` and `login()`.
+        - Authorization is managed via permissions and groups. After authentication, Django checks user permissions (e.g., using `user.has_perm()`) to determine if they are authorized to perform specific actions.
+
+- How Django Manages User Sessions and Cookie Security
+    1. Preserving user login state in Django
+        - **Session-based Authentication**: When a user logs in, Django creates a session to store the user's authentication state. This session is linked to a session ID, which is stored in the user's browser as a cookie.
+        - **Session ID in Cookies**: The cookie containing the session ID is sent back and forth between the client and server with each request. Django uses this session ID to retrieve the user's session data and remember that the user is logged in.
+        - **How Django Uses Sessions**: Django doesn’t store sensitive information like passwords in cookies; it only stores the session ID. The actual session data, including the user's login status, is stored on the server.
+    2. Other Uses of Cookies
+        - **Preferences**: Cookies can store user preferences, like language settings or theme choices, so that the user experience is personalized across sessions.
+        - **Tracking**: Cookies can be used for analytics, tracking user behavior on websites, or remembering items in a shopping cart.
+        - **Authentication Tokens**: Cookies are used for storing tokens in authentication mechanisms, such as JWT (JSON Web Tokens), for stateless user authentication.
+    3. Cookie Security
+        - **Not All Cookies Are Safe**: Cookies can pose security risks, especially if they are not properly protected. For instance, if cookies contain sensitive information and are not encrypted, they can be intercepted and misused.
+        - **Cookie Flags**: To enhance cookie security, Django supports setting flags like `HttpOnly`, `Secure`, and `SameSite`:
+            - `HttpOnly` prevents client-side JavaScript from accessing cookies, mitigating the risk of cross-site scripting (XSS) attacks.
+            - `Secure` ensures that cookies are only transmitted over HTTPS, protecting them from being intercepted over insecure connections.
+            - `SameSite` helps prevent cross-site request forgery (CSRF) by restricting how cookies are sent with cross-site requests.
+
+- Implementing Checklist
+    1. Creating User Registration Form
+        - Goal: Restrict access to the main page to logged-in users only.
+        - Steps:
+            1. Import `UserCreationForm` and `messages`.
+            ```
+            from django.contrib.auth.forms import UserCreationForm
+            from django.contrib import messages
+            ```
+            2. Create a `register()` function in `views.py` to handle user registration.
+            ```
+            def register(request):
+            form = UserCreationForm()
+            
+            if request.method == "POST":
+                form = UserCreationForm(request.POST)
+                if form.is_valid():
+                    form.save()
+                    messages.success(request, "Account has been successfully registered")
+                    return redirect('main:login')
+            context = {'form': form}
+            return render(request, "register.html", context)
+            ```
+            3. Create a `register.html` template to display the registration form. ==> [register.html](./main/templates/register.html)
+            4. Add a register path to `urls.py` to access the registration page.
+            ```
+             urlpatterns = [
+                ...
+                path('register/', register, name='register'),
+            ]
+            ```
+    2. Creating Login Form
+        - Goal: Allow registered users to log in to the app.
+        - Steps:
+            1. Import `AuthenticationForm`, `authenticate`, and `login`.
+            ```
+            from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+            from django.contrib.auth import authenticate, login
+            ```
+            2. Create a `login_user()` function in `views.py` to handle the login process.
+            ```
+            def login_user(request):
+            if request.method == 'POST':
+                form = AuthenticationForm(data=request.POST)
+                
+                if form.is_valid():
+                    user = form.get_user()
+                    login(request, user)
+                    response = HttpResponseRedirect(reverse("main:show_main"))
+                    response.set_cookie('last_login', str(datetime.datetime.now()))
+                    return response
+                
+            else:
+                form = AuthenticationForm(request)
+            context = {'form': form}
+            return render(request, "login.html", context)
+            ```
+            3. Create a `login.html` template to display the login form. ==> [login.html](./main/templates/login.html)
+            4. Add a login path to `urls.py` to access the login page.
+            ```
+            from main.views import login_user
+            ...
+            urlpatterns = [
+            ...
+            path('login/', login_user, name='login'),
+            ]
+            ```
+    3. Implementing Logout Mechanism
+        - Goal: Enable users to log out of the application.
+        - Steps:
+            1. Import logout in `views.py`.
+            2. Create a `logout_user()` function to handle the logout process.
+            ```
+            from django.contrib.auth import logout
+            ```
+            3. Add a logout button on the main page (`main.html`) and add a logout path in `urls.py` to handle the logout.
+            ```
+            def logout_user(request):
+                logout(request)
+                return redirect('main:login')
+            ```
+            ```
+            from main.views import logout_user
+            ...
+            urlpatterns = [
+            ...
+            path('logout/', logout_user, name='logout'),
+            ]
+            ```
+    4. Restricting Access to Main Page
+        - Goal: Ensure the main page can only be accessed by logged-in users.
+        - Steps:
+            1. Import `login_required` to protect page access.
+            ```
+            from django.contrib.auth.decorators import login_required
+            ```
+            2. Add the `@login_required(login_url='/login')` decorator above the `show_main()` function to require login.
+    5. Using Cookies to Track Last Login
+        - Goal: Display the user's last login time using cookies.
+        - Steps:
+            1. Add the `last_login` cookie in the `login_user()` function.
+            ```
+            def login_user(request):
+                ...
+                if form.is_valid():
+                user = form.get_user()
+                login(request, user)
+                response = HttpResponseRedirect(reverse("main:show_main"))
+                response.set_cookie('last_login', str(datetime.datetime.now()))
+                return response
+                ...
+            ```
+            2. Display the `last_login` information on the main page by modifying the `main.html` template.
+            ```
+            ...
+            <a href="{% url 'main:logout' %}">
+                <button>Logout</button>
+                <h5>Sesi terakhir login: {{ last_login }}</h5>
+            </a>
+            ```
+            3. Remove the `last_login` cookie upon logout by modifying the `logout_user()` function.
+            ```
+            def logout_user(request):
+                logout(request)
+                response = HttpResponseRedirect(reverse('main:login'))
+                response.delete_cookie('last_login')
+                return response
+            ```
+    6. Linking the `Product` Model with User
+        - Goal: Associate each Product with the user who created it.
+        - Steps:
+            1. Import User and add a ForeignKey relationship to the `Product` model.
+            ```
+            ...
+            from django.contrib.auth.models import User
+            class Product(models.Model):
+                user = models.ForeignKey(User, on_delete=models.CASCADE)
+            ...
+            ```
+            2. Modify the `create_product_request()` function to save the product request with the currently logged-in user.
+            ```
+            def create_product_request(request):
+                form = ProductRequestForm(request.POST or None)
+                
+                if form.is_valid() and request.method == "POST":
+                    product_request = form.save(commit=False)
+                    product_request.user = request.user
+                    product_request.save()
+                    return redirect('main:show_main')
+                
+                context = {'form': form}
+                return render(request, "create_product_request.html", context)
+            ```
+            3. Modify the `show_main()` function to display only the product requests that belongs to the logged-in user.
+            ```
+            def show_main(request):
+                product_requests = Product.objects.filter(user=request.user)
+            ```
+    7. Migrating Models
+        - After making changes to the models, run migrations by:
+            1. Running `python manage.py makemigrations`.
+            2. Set a default user when prompted (1 in this case).
+            3. Apply migrations using `python manage.py migrate`.
+    8. Preparing for Production
+        - Set the environment for production by updating the `DEBUG` setting in `settings.py`.
+        ```
+        import os
+        ...
+        PRODUCTION = os.getenv("PRODUCTION", False)
+        DEBUG = not PRODUCTION
+        ...
+        ```
