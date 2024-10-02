@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}Request New Product{% endblock %}
+{% block title %}Edit Product{% endblock %}
 
 {% block content %}
-
 <div class="mt-20 max-w-2xl mx-auto bg-coffee-medium p-8 rounded-lg shadow-md">
-    <h1 class="text-3xl font-coffee text-center mb-6">Request A New Product</h1>
+    <h1 class="text-3xl font-coffee text-center mb-6">Edit Product</h1>
     <form method="POST">
         {% csrf_token %}
         {% for field in form %}
@@ -22,9 +21,8 @@
                                value="{{ field.value|default:'5' }}"
                                class="w-full h-2 bg-coffee-light rounded-lg appearance-none cursor-pointer"
                                oninput="this.nextElementSibling.value = this.value">
-                               <output class="bg-coffee-dark text-coffee-light px-2 py-1 rounded">{{ field.value|default:'5' }}</output>
-                        
                         <span class="text-sm">10</span>
+                        <output class="bg-coffee-dark text-coffee-light px-2 py-1 rounded">{{ field.value|default:'5' }}</output>
                     </div>
                 {% elif field.name == 'category' %}
                 <select name="{{ field.name }}" 
@@ -37,9 +35,15 @@
                     {% endfor %}
                 </select>
                 {% elif field.field.widget.input_type == 'textarea' %}
-                    <textarea name="{{ field.name }}" id="{{ field.id_for_label }}" class="w-full p-2 border border-coffee-dark rounded h-32">{{ field.value|default:'' }}</textarea>
+                    <textarea name="{{ field.name }}" 
+                              id="{{ field.id_for_label }}" 
+                              class="w-full p-2 border border-coffee-dark rounded h-32">{{ field.value|default:'' }}</textarea>
                 {% else %}
-                    <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="{{ field.id_for_label }}" value="{{ field.value|default:'' }}" class="w-full p-2 border border-coffee-dark rounded">
+                    <input type="{{ field.field.widget.input_type }}" 
+                           name="{{ field.name }}" 
+                           id="{{ field.id_for_label }}" 
+                           value="{{ field.value|default:'' }}" 
+                           class="w-full p-2 border border-coffee-dark rounded">
                 {% endif %}
                 {% if field.errors %}
                     <div class="text-red-500 text-sm mt-1">
@@ -50,7 +54,10 @@
                 {% endif %}
             </div>
         {% endfor %}
-        <button type="submit" class="w-full bg-coffee-accent text-coffee-light py-2 px-4 rounded hover:bg-opacity-90 transition duration-300">Submit Request</button>
+        <div class="flex space-x-4">
+            <button type="submit" class="flex-1 bg-coffee-accent text-coffee-light py-2 px-4 rounded hover:bg-opacity-90 transition duration-300">Save Changes</button>
+            <a href="{% url 'main:show_main' %}" class="flex-1 bg-gray-500 text-white py-2 px-4 rounded hover:bg-opacity-90 transition duration-300 text-center">Cancel</a>
+        </div>
     </form>
 </div>
 {% endblock %}

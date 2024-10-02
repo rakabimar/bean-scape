@@ -1,13 +1,47 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% block meta %} {% endblock meta %}
-    </head>
-
-    <body>
-    {% block content %} {% endblock content %}
-    </body>
+    <title>BeanScape - {% block title %}{% endblock %}</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'coffee-dark': '#4A3728',
+                        'coffee-light': '#F5E6D3',
+                        'coffee-medium': '#D2B48C',
+                        'coffee-accent': '#2F4F4F',
+                    },
+                    fontFamily: {
+                        'coffee': ['"Playfair Display"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    {% block extra_head %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/global.css' %}">
+</head>
+<body class="bg-coffee-light text-coffee-dark">
+    <header class="bg-coffee-dark text-coffee-light p-4">
+        {% include 'navbar.html' %}
+    </header>
+    <main class="container mx-auto mt-8 px-4 animate-fade-in">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer class="bg-coffee-dark text-coffee-light p-4 mt-8">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 BeanScape. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
 </html>

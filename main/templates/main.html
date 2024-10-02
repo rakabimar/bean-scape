@@ -1,47 +1,65 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
-<h1>{{ appName }}</h1>
+<div class="container mx-auto px-4">
+    <h1 class="text-center text-4xl font-coffee mb-2">Welcome to {{ appName }}, {{ name }}!</h1>
+    <p class="text-center text-xl">Discover the finest coffee beans and beverages.</p>
+    <h1 class="mt-10 text-3xl font-coffee text-center mb-6">Your Coffee Products</h1>
+    
+    {% if product_requests %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for product in product_requests %}
+            {% include 'card_product.html' with product=product %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="mt-5 text-center py-8">
+        <div class="max-w-xs mx-auto mb-6">
+            <head>
+        <link rel="stylesheet" href="{% static 'css/global.css' %}">
+    </head>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-full h-auto">
+                <defs>
+                    <style>
+                        .coffee-dark { fill: #6F4E37; }
+                        .coffee-medium { fill: #967259; }
+                        .coffee-light { fill: #B87A5B; }
+                    </style>
+                </defs>
+                <!-- Empty Coffee Cup -->
+                <path class="coffee-medium" d="M384 64H128c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32h256c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32z"/>
+                <path class="coffee-dark" d="M96 160v192c0 35.3 28.7 64 64 64h192c35.3 0 64-28.7 64-64V160H96zm64-32h192c17.7 0 32-14.3 32-32s-14.3-32-32-32H160c-17.7 0-32 14.3-32 32s14.3 32 32 32z"/>
+                <!-- Steam -->
+                <g class="animate-steam">
+                    <path class="coffee-light" d="M200 48c0-8.8-7.2-16-16-16s-16 7.2-16 16 7.2 16 16 16 16-7.2 16-16zM256 16c0-8.8-7.2-16-16-16s-16 7.2-16 16 7.2 16 16 16 16-7.2 16-16zM312 48c0-8.8-7.2-16-16-16s-16 7.2-16 16 7.2 16 16 16 16-7.2 16-16z">
+                        <animate attributeName="opacity" values="0;1;0" dur="2s" repeatCount="indefinite" />
+                    </path>
+                </g>
+                <!-- Plus Sign -->
+                <circle class="coffee-light" cx="256" cy="256" r="48"/>
+                <rect class="coffee-dark" x="248" y="224" width="16" height="64" rx="8"/>
+                <rect class="coffee-dark" x="224" y="248" width="64" height="16" rx="8"/>
+            </svg>
+        </div>
+        <p class="text-xl text-gray-600 mb-4">Your coffee inventory is empty!</p>
+        <p class="text-gray-500 mb-6">Start by adding your favorite coffee products.</p>
+        <a href="{% url 'main:create_product_request' %}" 
+           class="inline-block bg-coffee-medium hover:bg-coffee-dark text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
+            Add Your First Product
+        </a>
+    </div>
+    {% endif %}
+</div>
 
-<h5>NPM: </h5>
-<p>{{ npm }}<p>
-<h5>Name: </h5>
-<p>{{ name }}<p>
-<h5>Class: </h5>
-<p>{{ class }}<p>
-
-{% if not product_requests %}
-<p>Belum ada request product baru di beanScape.</p>
-{% else %}
-<table>
-    <tr>
-    <th>Coffee Name</th>
-    <th>Price</th>
-    <th>Description</th>
-    <th>Category</th>
-    <th>Bitterness (1-10)</th>
-    </tr>
-
-    {% comment %} Berikut cara memperlihatkan data product request di bawah baris ini 
-    {% endcomment %} 
-    {% for product_request in product_requests %}
-    <tr>
-    <td>{{product_request.name}}</td>
-    <td>{{product_request.price}}</td>
-    <td>{{product_request.description}}</td>
-    <td>{{product_request.category}}</td>
-    <td>{{product_request.bitterness}}</td>
-    </tr>
-    {% endfor %}
-</table>
-{% endif %}
-
-<br />
-
-<a href="{% url 'main:create_product_request' %}">
-    <button>Request A New Product</button>
-</a>
-<a href="{% url 'main:logout' %}">
-    <button>Logout</button>
-    <h5>Sesi terakhir login: {{ last_login }}</h5>
-</a>
+<style>
+    @keyframes steam {
+        0% { opacity: 0; transform: translateY(0); }
+        50% { opacity: 0.8; }
+        100% { opacity: 0; transform: translateY(-20px); }
+    }
+    .animate-steam {
+        animation: steam 2s infinite;
+    }
+</style>
 {% endblock content %}

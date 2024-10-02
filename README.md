@@ -5,6 +5,7 @@ Platform Based Programming (PBP) Course --- Tugas Individu
 - [Tugas 2](#tugas-2)
 - [Tugas 3](#tugas-3)
 - [Tugas 4](#tugas-4)
+- [Tugas 5](#tugas-5)
 
 ## Tugas 2 <a id="tugas-2"></a>
 [beanScape's url](http://rakabima-ghaniendra-beanscape.pbp.cs.ui.ac.id)
@@ -492,3 +493,207 @@ graph TD
         DEBUG = not PRODUCTION
         ...
         ```
+
+## Tugas 5 <a id="tugas-5"></a>
+
+* CSS Selector Priority
+    1. **Specificity Hierarchy**: CSS selectors have a specificity hierarchy that determines which styles are applied when multiple selectors target the same element. The order of priority, from highest to lowest, is:
+        - Inline styles
+        - IDs
+        - Classes, attributes, and pseudo-classes
+        - Elements and pseudo-elements
+    2. **Inline Styles**: Styles applied directly to an HTML element using the `style` attribute have the highest priority.
+    3. **IDs**: Selectors using the ID of an element (e.g., `#myElement`) have the next highest specificity.
+    4. **Classes, Attributes, and Pseudo-classes**: These include selectors like `.myClass`, `[type="text"]`, or `:hover`.
+    5. **Elements and Pseudo-elements**: Selectors using element names (e.g., `div`) or pseudo-elements (e.g., `::before`) have the lowest specificity.
+    6. **Cascading Rule**: When selectors have equal specificity, the rule that appears later in the CSS file takes precedence.
+    7. **!important**: The `!important` declaration overrides normal specificity rules and should be used sparingly.
+
+* Importance of *responsive design* and its example
+    1. **Importance of Responsive Design**:
+        - **Device Diversity**: With the proliferation of devices with varying screen sizes (smartphones, tablets, desktops), responsive design ensures a consistent user experience across all platforms.
+        - **Mobile-First Approach**: As mobile internet usage surpasses desktop, responsive design caters to this shift in user behavior.
+        - **SEO Benefits**: Search engines favor mobile-friendly websites, improving search rankings.
+        - **Cost-Effective**: It's more efficient to maintain one responsive site than separate mobile and desktop versions.
+        - **User Experience**: Improves user satisfaction by providing optimal viewing and interaction experience across devices.
+
+    2. **Examples**:
+        - **Responsive Design**:
+            - Amazon: Adapts seamlessly from desktop to mobile, maintaining functionality and readability.
+            - The New York Times: Content layout adjusts fluidly across devices.
+        - **Non-Responsive Design**:
+            - Old government websites: Often designed for desktop only, requiring horizontal scrolling on mobile.
+            - Legacy business sites: May have separate mobile versions instead of a single responsive design.
+
+* Difference between *margin*, *border*, and *padding*. Steps in implementing
+    1. **Margin**:
+        - **Definition**: Space outside the element's border.
+        - **Usage**: Creates space between elements.
+        - **Implementation**: `margin: 10px;` or `margin-top: 5px;`
+
+    2. **Border**:
+        - **Definition**: Line surrounding the element's content and padding.
+        - **Usage**: Visually separates elements or adds decorative lines.
+        - **Implementation**: `border: 1px solid black;` or `border-bottom: 2px dashed red;`
+
+    3. **Padding**:
+        - **Definition**: Space between the element's content and its border.
+        - **Usage**: Creates space within an element.
+        - **Implementation**: `padding: 15px;` or `padding-left: 20px;`
+
+    4. **Implementation Example**:
+        ```css
+        .box {
+            margin: 10px;
+            border: 2px solid blue;
+            padding: 15px;
+        }
+        ```
+
+* Concept of *flex box* and *grid layout* and its usage
+    1. **Flexbox**:
+        - **Concept**: One-dimensional layout model for arranging items in rows or columns.
+        - **Key Features**:
+            - Flexible container and item sizes
+            - Easy alignment and distribution of space
+            - Dynamic ordering of items
+        - **Usage**:
+            - Navigation menus
+            - Card layouts
+            - Centering content
+        - **Implementation**:
+            ```css
+            .container {
+                display: flex;
+                justify-content: space-between;
+            }
+            ```
+
+    2. **Grid Layout**:
+        - **Concept**: Two-dimensional layout system for rows and columns simultaneously.
+        - **Key Features**:
+            - Precise control over both row and column layouts
+            - Gap control between grid items
+            - Overlapping capabilities
+        - **Usage**:
+            - Complex page layouts
+            - Image galleries
+            - Responsive design without media queries
+        - **Implementation**:
+            ```css
+            .container {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            ```
+
+    3. **Comparison**:
+        - Flexbox is ideal for one-dimensional layouts (either row or column).
+        - Grid is perfect for two-dimensional layouts (rows and columns simultaneously).
+        - Both can be used together for complex, responsive designs.
+
+- Implementing Checklists
+    1. **Implementing Functions to Edit and Delete Products**
+        - Goal: Enable users to edit and delete existing products.
+        - Steps:
+            1. Edit Product:
+                - Create an edit view function in `views.py` to handle the product update.
+                ```
+                def edit_product(request, id):
+                # Get product from id
+                product = Product.objects.get(pk = id)
+                
+                # Set product as instance of forms
+                form = ProductRequestForm(request.POST or None, instance=product)
+                
+                if form.is_valid() and request.method == "POST":
+                    # Save form
+                    form.save()
+                    # Return to main page
+                    return HttpResponseRedirect(reverse('main:show_main'))
+                
+                context = {'form': form}
+                return render(request, "edit_product.html", context)
+                ```
+                - Add an edit route in `urls.py`.
+                ```
+                path('edit_product/<int:product_id>/', edit_product, name='edit_product'),
+                ```
+            2. Delete Product:
+                - Create a delete view function in `views.py` to handle the deletion.
+                ```
+                def delete_product(request, id):
+                # Get product from id
+                product = Product.objects.get(pk = id)
+                
+                # Delete product
+                product.delete()
+                
+                # Return to main page
+                return HttpResponseRedirect(reverse('main:show_main'))
+                ```
+                - Add a delete route in `urls.py`.
+                ```
+                path('delete_product/<int:product_id>/', delete_product, name='delete_product'),
+                ```
+    2. **Customizing HTML Templates**
+        - Goal: Enhance the visual appeal of login, register, and product pages using CSS or CSS frameworks.
+        - Steps:
+            1. Use a CSS Framework: Link Tailwind in templates.
+            2. Login, Register, Request Product Pages: Apply attractive styling by customizing forms and buttons.
+                - [login.html](main/templates/login.html)
+                - [register.html](main/templates/register.html)
+                - [create_product_request.html](main/templates/create_product_request.html)
+    3. Customizing the Product List Page
+        - Goal: Make the product list page visually engaging and responsive. Handle cases where no products exist.
+        - Steps:
+            1. Empty Product List: Show an image and a message when no products exist. ([main.html](main/templates/main.html))
+            ```
+            {% else %}
+            <div class="text-center py-8">
+                <div class="max-w-xs mx-auto mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-full h-auto">
+                        <defs>
+                            <style>
+                                .coffee-dark { fill: #6F4E37; }
+                                .coffee-medium { fill: #967259; }
+                                .coffee-light { fill: #B87A5B; }
+                            </style>
+                        </defs>
+                        <!-- Empty Coffee Cup -->
+                        <path class="coffee-medium" d="M384 64H128c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32h256c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32z"/>
+                        <path class="coffee-dark" d="M96 160v192c0 35.3 28.7 64 64 64h192c35.3 0 64-28.7 64-64V160H96zm64-32h192c17.7 0 32-14.3 32-32s-14.3-32-32-32H160c-17.7 0-32 14.3-32 32s14.3 32 32 32z"/>
+                        <!-- Steam -->
+                        <g class="animate-steam">
+                            <path class="coffee-light" d="M200 48c0-8.8-7.2-16-16-16s-16 7.2-16 16 7.2 16 16 16 16-7.2 16-16zM256 16c0-8.8-7.2-16-16-16s-16 7.2-16 16 7.2 16 16 16 16-7.2 16-16zM312 48c0-8.8-7.2-16-16-16s-16 7.2-16 16 7.2 16 16 16 16-7.2 16-16z">
+                                <!-- Animation handled by global.css -->
+                            </path>
+                        </g>
+                        <!-- Plus Sign -->
+                        <circle class="coffee-light" cx="256" cy="256" r="48"/>
+                        <rect class="coffee-dark" x="248" y="224" width="16" height="64" rx="8"/>
+                        <rect class="coffee-dark" x="224" y="248" width="64" height="16" rx="8"/>
+                    </svg>
+                </div>
+                <p class="text-xl text-gray-600 mb-4">Your coffee inventory is empty!</p>
+                <p class="text-gray-500 mb-6">Start by adding your favorite coffee products.</p>
+                <a href="{% url 'main:create_product_request' %}" 
+                class="inline-block bg-coffee-medium hover:bg-coffee-dark text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                    Add Your First Product
+                </a>
+            </div>
+            ```
+            2. Display Products in Cards: Show product details using card components with edit and delete buttons.
+                - [card_product.html](main/templates/card_product.html)
+    4. Adding a Responsive Navigation Bar (Navbar)
+        - Goal: Create a responsive navigation bar that adapts to both desktop and mobile views.
+        - Steps:
+            1. Create a Navbar: Include navigation links for the main features like login, logout, product list, etc.
+                - [navbar.html](templates/navbar.html)
+            2. Responsive Design: Use CSS or framework classes to make the navbar responsive on mobile devices
+            ```
+            ...
+            <div class="mobile-menu hidden md:hidden px-4 w-full md:max-w-full bg-coffee-dark">
+            ...
+            ```

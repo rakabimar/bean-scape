@@ -1,0 +1,156 @@
+/* static/css/global.css */
+
+/* Custom Properties - matching your Tailwind config */
+:root {
+    --coffee-dark: #4A3728;
+    --coffee-medium: #D2B48C;
+    --coffee-light: #F5E6D3;
+    --coffee-accent: #2F4F4F;
+}
+
+/* Global Styles */
+body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+}
+
+/* Form Styles */
+input, textarea, select {
+    transition: all 0.3s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--coffee-accent) !important;
+    box-shadow: 0 0 0 2px rgba(47, 79, 79, 0.2);
+}
+
+/* Button Styles */
+button {
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* Navigation Enhancements */
+nav a {
+    transition: all 0.3s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--coffee-light);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--coffee-medium);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--coffee-dark);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+/* Card Enhancements */
+.bg-coffee-medium {
+    transition: transform 0.3s ease;
+}
+
+.bg-coffee-medium:hover {
+    transform: translateY(-2px);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .mobile-menu {
+        border-top: 1px solid rgba(245, 230, 211, 0.1);
+    }
+}
+
+/* Utility Classes */
+.text-shadow {
+    text-shadow: 2px 2px 4px rgba(74, 55, 40, 0.1);
+}
+
+/* Slider styles */
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 8px;
+    border-radius: 5px;
+    background: var(--coffee-light);
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .2s;
+}
+
+input[type="range"]:hover {
+    opacity: 1;
+}
+
+/* Slider handle styles */
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--coffee-accent);
+    cursor: pointer;
+    transition: background .3s ease-in-out;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--coffee-accent);
+    cursor: pointer;
+    border: none;
+    transition: background .3s ease-in-out;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--coffee-dark);
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+    background: var(--coffee-dark);
+}
+
+/* Output styles */
+output {
+    transition: all 0.3s ease;
+}

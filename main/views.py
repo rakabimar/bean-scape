@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.core import serializers
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from main.forms import ProductRequestForm
 from main.models import Product
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -18,9 +18,9 @@ def show_main(request):
         'npm' : '2306123456',
         'name': request.user.username,
         'class': 'PBP E',
-        'appName' : 'beanScape',
+        'appName' : 'BeanScape',
         'product_requests': product_requests,
-        'last_login': request.COOKIES['last_login']
+        'last_login': request.COOKIES.get('last_login', 'N/A')  # Use get to avoid KeyError
     }
 
     return render(request, "main.html", context)
@@ -86,3 +86,29 @@ def show_xml_by_id(request, id):
 def show_json_by_id(request, id):
     data = Product.objects.filter(pk=id)
     return HttpResponse(serializers.serialize("json", data), content_type="application/json")
+
+def edit_product(request, id):
+    # Get product from id
+    product = Product.objects.get(pk = id)
+    
+    # Set product as instance of forms
+    form = ProductRequestForm(request.POST or None, instance=product)
+    
+    if form.is_valid() and request.method == "POST":
+        # Save form
+        form.save()
+        # Return to main page
+        return HttpResponseRedirect(reverse('main:show_main'))
+    
+    context = {'form': form}
+    return render(request, "edit_product.html", context)
+
+def delete_product(request, id):
+    # Get product from id
+    product = Product.objects.get(pk = id)
+    
+    # Delete product
+    product.delete()
+    
+    # Return to main page
+    return HttpResponseRedirect(reverse('main:show_main'))
