@@ -101,16 +101,66 @@
 </style>
 <script>
     function addProductEntry() {
-        fetch("{% url 'main:add_product_ajax' %}", {
-            method: "POST",
-            body: new FormData(document.querySelector('#productForm')),
-        })
-        .then(response => refreshProductEntries())
+        const name = document.getElementById('name');
+        const price = document.getElementById('price');
+        const description = document.getElementById('description');
+        const category = document.getElementById('category');
+        const bitterness = document.getElementById('bitterness');
+        
+        const errorElements = document.querySelectorAll('.error-message');
+        errorElements.forEach(element => element.remove());
+        
+        let isValid = true;
+        
+        if (!name.value.trim()) {
+            showError(name, 'Product name is required');
+            isValid = false;
+        }
+        
+        if (!price.value) {
+            showError(price, 'Price is required');
+            isValid = false;
+        }
+        
+        if (!description.value.trim()) {
+            showError(description, 'Description is required');
+            isValid = false;
+        }
 
-        document.getElementById("productForm").reset();
-        document.querySelector("[data-modal-toggle='crudModal']").click();
+        if (isValid) {
+            fetch("{% url 'main:add_product_ajax' %}", {
+                method: "POST",
+                body: new FormData(document.querySelector('#productForm')),
+            })
+            .then(response => {
+                refreshProductEntries();
+            });
+
+            hideModal();
+            document.getElementById("productForm").reset();
+            document.querySelector("[data-modal-toggle='crudModal']").click();
+        }
 
         return false;
+    }
+
+    function showError(inputElement, message) {
+        const existingError = inputElement.parentElement.querySelector('.error-message');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message text-red-500 text-sm mt-1';
+        errorDiv.textContent = message;
+        inputElement.parentElement.appendChild(errorDiv);
+        
+        inputElement.classList.add('border-red-500');
+        
+        setTimeout(() => {
+            inputElement.classList.remove('border-red-500');
+            errorDiv.remove();
+        }, 5000);
     }
 
     document.getElementById("productForm").addEventListener("submit", (e) => {
@@ -212,7 +262,6 @@
         document.getElementById("product_cards").className = classNameString;
         document.getElementById("product_cards").innerHTML = htmlString;
     }
-    refreshProductEntries();
 
     const modal = document.getElementById('crudModal');
     const modalContent = document.getElementById('crudModalContent');
@@ -251,9 +300,11 @@
         document.getElementById('bitternessValue').textContent = sliderValue;
     }
 
-    // Set the initial value when the page loads
+    // Set the initial value when the page load
     document.addEventListener('DOMContentLoaded', () => {
         updateBitternessValue(); // Set the initial value to whatever is in the range input
     });
+
+    refreshProductEntries();
 </script>
 {% endblock content %}
