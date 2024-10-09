@@ -6,6 +6,7 @@ Platform Based Programming (PBP) Course --- Tugas Individu
 - [Tugas 3](#tugas-3)
 - [Tugas 4](#tugas-4)
 - [Tugas 5](#tugas-5)
+- [Tugas 6](#tugas-6)
 
 ## Tugas 2 <a id="tugas-2"></a>
 [beanScape's url](http://rakabima-ghaniendra-beanscape.pbp.cs.ui.ac.id)
@@ -697,3 +698,263 @@ graph TD
             <div class="mobile-menu hidden md:hidden px-4 w-full md:max-w-full bg-coffee-dark">
             ...
             ```
+
+## Tugas 6 <a id="tugas-6"></a>
+
+* Benefits of using JavaScript in web application development:
+    1. **Interactivity**: JavaScript makes web elements more responsive. For example, it can validate form inputs or display instant messages when buttons are clicked, providing users with immediate feedback for a better user experience.
+    2. **Dynamic Page Updates**: Developers can modify webpage content and appearance in real-time without page reloads. Elements can be added, removed, or edited based on user interactions, allowing for dynamic content updates.
+    3. **Animations and Visual Effects**: JavaScript enables the creation of animations and visual effects like transitions or color changes on hover, enhancing the visual appeal and interactivity of websites.
+    4. **Data Exchange**: JavaScript facilitates seamless data retrieval and submission to servers without page refreshes using AJAX, resulting in faster and smoother user experiences.
+    5. **Code Examples**:
+        - AJAX GET: Functions like `getProductEntries()` and `refreshProductEntries()` fetch product data from the server and dynamically update HTML elements.
+        - AJAX POST: The `addProductEntry()` function sends data to the server using `fetch()` without refreshing the page when a form is submitted.
+
+* Purpose of await with `fetch()`:
+    - The `await` keyword is essential when using `fetch()` for asynchronous operations. It ensures JavaScript waits for the server response before proceeding with code execution. Without `await`, JavaScript would continue executing subsequent code before receiving the server response, potentially causing errors when trying to manipulate unavailable data.
+
+* Necessity of `csrf_exempt` decorator for AJAX POST views:
+    - The `csrf_exempt` decorator exempts AJAX POST views from Django's default CSRF (Cross-Site Request Forgery) protection. While Django typically requires CSRF tokens for POST requests as a security measure, AJAX requests may not include these tokens. Using ``csrf_exempt` allows POST requests without CSRF verification, simplifying AJAX handling but potentially reducing security.
+
+* Backend vs. Frontend data validation:
+    1. While frontend validation using JavaScript improves user experience, backend validation is crucial for ensuring data security and integrity. Frontend validation can be bypassed by disabling JavaScript or modifying requests, so backend validation ensures all data entering the server is properly sanitized and safe for database storage.
+    2. **Code Examples**:
+        - `add_product_ajax()` view validates and processes form data before saving it to the database using `strip_tags`
+
+* Implementing Checklists
+    1. **Creating Data Reception and Addition Functions via AJAX**
+        - The first step is to develop a function in views.py that processes AJAX POST requests. This function receives product data sent through AJAX, sanitizes it, adds it to the database, and sends back a response.
+        ```
+        @csrf_exempt
+        @require_POST
+        def add_product_ajax(request):
+            user = request.user
+            name = strip_tags(request.POST.get('name'))
+            price = request.POST.get('price')
+            description = strip_tags(request.POST.get('description'))
+            category = request.POST.get('category')
+            bitterness = request.POST.get('bitterness')
+            
+            new_product = Product(
+                user=user,
+                name=name,
+                price=price,
+                description=description,
+                category=category,
+                bitterness=bitterness
+            )
+            new_product.save()
+            
+            return HttpResponse(b"CREATED", status=201)
+        ```
+        - This function captures product details transmitted from a modal (such as product name, description, price, etc.), cleans the data, then incorporates it into the Product model.
+
+2. **Setting Up URL Routing**
+    - After creating the AJAX product addition function, a new path must be added to urls.py to make this view accessible.
+    ```
+    urlpatterns = [
+        ...
+        path('add-product-ajax', add_product_ajax, name='add_product_ajax'),
+        ...
+    ]
+    ```
+3. **Displaying Data in the Main Template**
+    - Create HTML elements in main.html that serve as containers for showing products. Use a specific ID, such as product_cards, which JavaScript will populate dynamically.
+    ```
+    <div id="product_cards"></div>
+    ```
+4. **Developing Scripts for Data Retrieval and Display**
+    - To show existing products, include a script in main.html that uses fetch to retrieve product data in JSON format from the server, then displays it in the previously created HTML elements.
+    ```
+    async function getProductEntries() {
+        return fetch("{% url 'main:show_json' %}").then((res) => res.json());
+    }
+
+    async function refreshProductEntries() {
+            document.getElementById("product_cards").innerHTML = "";
+            document.getElementById("product_cards").classname = "";
+            const productEntries = await getProductEntries();
+            let htmlString = "";
+            let classNameString = "";
+
+            if (productEntries.length === 0) {
+                classNameString = "mt-5 text-center py-8";
+                htmlString = `
+                    <div class="max-w-xs mx-auto mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -50 512 512" class="w-full h-auto">
+                            <defs>
+                                <style>
+                                    .coffee-dark { fill: #6F4E37; }
+                                    .coffee-medium { fill: #967259; }
+                                    .coffee-light { fill: #B87A5B; }
+                                </style>
+                            </defs>
+                            <!-- Empty Coffee Cup -->
+                            <path class="coffee-medium" d="M384 64H128c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32h256c17.7 0 32-14.3 32-32V96c0-17.7-14.3-32-32-32z"/>
+                            <path class="coffee-dark" d="M96 160v192c0 35.3 28.7 64 64 64h192c35.3 0 64-28.7 64-64V160H96zm64-32h192c17.7 0 32-14.3 32-32s-14.3-32-32-32H160c-17.7 0-32 14.3-32 32s14.3 32 32 32z"/>
+                            <!-- Steam -->
+                            <g class="animate-steam" transform="translate(256, -40)">
+                                <path class="coffee-light" d="M200 48c0-8.8-7.2-16-16-16s-16 7.2-16 16 7.2 16 16 16 16-7.2 16-16zM256 16c0-8.8-7.2-16-16-16s-16 7.2-16 16 7.2 16 16 16 16-7.2 16-16zM312 48c0-8.8-7.2-16-16-16s-16 7.2-16 16 7.2 16 16 16 16-7.2 16-16z"/>
+                            </g>
+                            <!-- Plus Sign -->
+                            <circle class="coffee-light" cx="256" cy="256" r="48"/>
+                            <rect class="coffee-dark" x="248" y="224" width="16" height="64" rx="8"/>
+                            <rect class="coffee-dark" x="224" y="248" width="64" height="16" rx="8"/>
+                        </svg>
+                    </div>
+                    <p class="text-xl text-gray-600 mb-4">Your coffee inventory is empty!</p>
+                    <p class="text-gray-500 mb-6">Start by adding your favorite coffee products.</p>
+                    <button onclick="showModal()" 
+                            class="inline-block bg-coffee-medium hover:bg-coffee-dark text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-1">
+                        Add Your First Product
+                    </button>
+                `;
+            }
+            else {
+                classNameString = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                productEntries.forEach((item) => {
+                htmlString += `
+                    <div class="bg-coffee-medium rounded-lg shadow-md p-6 relative">
+                        <h2 class="text-2xl font-bold text-coffee-dark mb-1">${item.fields.name}</h2>
+                        
+                        <div class="flex items-center mb-3">
+                            <span class="text-xl font-semibold text-coffee-dark">Rp${item.fields.price}</span>
+                            <span class="ml-2 px-2 py-1 bg-coffee-light rounded-full text-sm text-coffee-dark">
+                                ${item.fields.category === 'Beverage' ? 'Beverage' : 'Beans'}
+                            </span>
+                        </div>
+                        
+                        <p class="text-coffee-dark/80 mb-4 leading-relaxed">${item.fields.description}</p>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-coffee-dark mb-1">Bitterness Level</label>
+                            <div class="w-full bg-coffee-light rounded-full h-2">
+                                <div class="bg-coffee-dark h-2 rounded-full" style="width: ${item.fields.bitterness * 10}%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs mt-1 text-coffee-dark/70">
+                                <span>Mild</span>
+                                <span class="font-medium">${item.fields.bitterness}/10</span>
+                                <span>Strong</span>
+                            </div>
+                        </div>
+                        
+                        <div class="absolute top-4 right-4 flex space-x-2">
+                            <a href="/edit-product/${item.pk}" 
+                                class="text-coffee-dark hover:text-coffee-accent transition-colors duration-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                            </a>
+                            <a href="/delete-product/${item.pk}" 
+                                onclick="return confirm('Are you sure you want to delete this item?');"
+                                class="text-red-500 hover:text-red-700 transition-colors duration-300">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                `;
+                });
+            }
+            document.getElementById("product_cards").className = classNameString;
+            document.getElementById("product_cards").innerHTML = htmlString;
+        }
+        refreshProductEntries();
+        ```
+
+5. **Creating an Input Modal**
+    - Within main.html, develop a modal for adding new products using AJAX. This modal should contain input fields for all necessary product details.
+    ```
+    <div id="crudModal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 w-full flex items-center justify-center bg-gray-800 bg-opacity-50 overflow-x-hidden overflow-y-auto transition-opacity duration-300 ease-out">
+            <div id="crudModalContent" class="relative bg-white rounded-lg shadow-lg w-5/6 sm:w-3/4 md:w-1/2 lg:w-1/3 mx-4 sm:mx-0 transform scale-95 opacity-0 transition-transform transition-opacity duration-300 ease-out">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between p-4 border-b rounded-t">
+                    <h3 class="text-xl font-semibold text-coffee-dark">Add New Product</h3>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" id="closeModalBtn">
+                        <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                <div class="px-6 py-4 space-y-6">
+                    <form id="productForm" method="POST" action="{% url 'main:create_product_request' %}">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="name" class="block text-sm font-medium text-coffee-dark">Product Name</label>
+                            <input type="text" id="name" name="name" class="mt-1 block w-full border border-coffee-light rounded-md p-2 hover:border-coffee-dark" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="price" class="block text-sm font-medium text-coffee-dark">Price (Rp)</label>
+                            <input type="number" id="price" name="price" class="mt-1 block w-full border border-coffee-light rounded-md p-2 hover:border-coffee-dark" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="description" class="block text-sm font-medium text-coffee-dark">Description</label>
+                            <textarea id="description" name="description" rows="3" class="mt-1 block w-full resize-none border border-coffee-light rounded-md p-2 hover:border-coffee-dark" required></textarea>
+                        </div>
+                        <div class="mb-4">
+                            <label for="category" class="block text-sm font-medium text-coffee-dark">Category</label>
+                            <select id="category" name="category" class="mt-1 block w-full border border-coffee-light rounded-md p-2 hover:border-coffee-dark" required>
+                                <option value="BEV">Beverage</option>
+                                <option value="BNS">Beans</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label for="bitterness" class="block text-sm font-medium text-coffee-dark">Bitterness (1-10)</label>
+                            <input type="range" id="bitterness" name="bitterness" min="1" max="10" value="5" class="mt-1 block w-full" required oninput="updateBitternessValue()">
+                            <div class="flex justify-between text-xs mt-1 text-coffee-dark/70">
+                                <span>Mild (1)</span>
+                                <span id="bitternessValue">5</span>
+                                <span>Strong (10)</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- Modal footer -->
+                <div class="flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-2 p-6 border-t border-gray-200 rounded-b justify-center md:justify-end">
+                    <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg" id="cancelButton">Cancel</button>
+                    <button type="submit" form="productForm" class="bg-coffee-dark hover:bg-coffee-medium text-white font-bold py-2 px-4 rounded-lg">Save Product</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    ```
+6. **Implementing Modal Control Functions**
+    - Create two functions, `showModal()` and `hideModal()`, which control the visibility of the modal. These functions are triggered by buttons on the main page.
+    ```
+    function showModal() {
+        document.getElementById('crudModal').classList.remove('hidden');
+    }
+
+    function hideModal() {
+        document.getElementById('crudModal').classList.add('hidden');
+    }
+
+    document.getElementById("cancelButton").addEventListener("click", hideModal);
+    ```
+
+7. **Implementing AJAX Data Addition**
+    - Develop an addProductEntry() function to send product data to the server via AJAX POST. After successful addition, the modal closes and the form resets.
+    ```
+    function addProductEntry() {
+        fetch("{% url 'main:add_product_ajax' %}", {
+            method: "POST",
+            body: new FormData(document.querySelector('#productForm')),
+        })
+        .then(response => refreshProductEntries())
+
+        document.getElementById("productForm").reset();
+        document.querySelector("[data-modal-toggle='crudModal']").click();
+
+        return false;
+    }
+    ```
+8. **Form Submission Event Handling**
+    - Add an event listener to the modal form to handle form submissions and trigger addProductEntry().
+    ```
+    document.getElementById("productEntryForm").addEventListener("submit", (e) => {
+        e.preventDefault();
+        addProductEntry();
+    });
+    ```
