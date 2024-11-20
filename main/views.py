@@ -1,4 +1,5 @@
-from django.http import HttpResponse
+import json
+from django.http import HttpResponse, JsonResponse
 from django.core import serializers
 from django.shortcuts import render, redirect, reverse
 from main.forms import ProductRequestForm
@@ -137,3 +138,76 @@ def add_product_ajax(request):
     new_product.save()
     
     return HttpResponse(b"CREATED", status=201)
+
+@csrf_exempt
+def create_product_flutter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        # Check if the user is authenticated
+        if request.user.is_authenticated:
+            user = request.user
+        else:
+            # Optionally, you can handle anonymous users or require authentication
+            return JsonResponse({"status": "error", "message": "User not authenticated"}, status=401)
+
+        # Extract data from the request
+        name = data.get("name", "")
+        price = data.get("price", 0)
+        description = data.get("description", "")
+        category = data.get("category", "")
+        bitterness = data.get("bitterness", 0)
+
+        # Data validation
+        if not name:
+            return JsonResponse({"status": "error", "message": "Name cannot be empty"}, status=400)
+        if not description:
+            return JsonResponse({"status": "error", "message": "Description cannot be empty"}, status=400)
+        if not category:
+            return JsonResponse({"status": "error", "message": "Category cannot be empty"}, status=400)
+        try:
+            price = int(price)
+            bitterness = int(bitterness)
+        except ValueError:
+            return JsonResponse({"status": "error", "message": "Price and bitterness must be integers"}, status=400)
+        if price < 0:
+            return JsonResponse({"status": "error", "message": "Price cannot be negative"}, status=400)
+        if bitterness < 0 or bitterness > 10:
+            return JsonResponse({"status": "error", "message": "Bitterness must be between 0 and 10"}, status=400)
+
+        # Create new product entry
+        new_product = Product.objects.create(
+            user=user,
+            name=name,
+            price=price,
+            description=description,
+            category=category,
+            bitterness=bitterness
+        )
+        
+        new_product.save()
+
+        return JsonResponse({"status": "success"}, status=201)
+    else:
+        return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+
+# Function untuk filter json sesuai dengan user logged in
+@login_required
+def user_products_json(request):
+    products = Product.objects.filter(user=request.user)
+    data = [
+        {
+            'model': 'app.productentry',
+            'pk': product.pk,
+            'fields': {
+                'user': product.user.id,
+                'name': product.name,
+                'price': product.price,
+                'description': product.description,
+                'category': product.category,
+                'bitterness': product.bitterness,
+            }
+        }
+        for product in products
+    ]
+    return JsonResponse(data, safe=False)
